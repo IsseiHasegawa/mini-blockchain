@@ -58,6 +58,19 @@ class Wallet(object):
         #8 
         blockchain_address = base58.b58encode(address_hex).decode('utf-8')
         return blockchain_address
+    
+class Transaction(object):
+    def __init__(self, sender_private_key, sender_public_key,
+                 sender_blockchain_address, recipient_blockchain_address,
+                 value):
+        self.sender_private_key = sender_private_key
+        self.sender_public_key = sender_public_key
+        self.sender_blockchain_address = sender_blockchain_address
+        self.recipient_blockchain_address = recipient_blockchain_address
+        self.value = value
+
+
+        
 
 if __name__ == '__main__':
     wallet = Wallet()
