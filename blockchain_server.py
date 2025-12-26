@@ -20,6 +20,14 @@ def get_blockchain():
             'blockchain_address' : miners_wallet.blockchain_address})
     return cache['blockchain']
 
+@app.route('/chain', methods=['GET'])
+def get_chain():
+    block_chain = get_blockchain()
+    respponse = {
+        "chain" : block_chain.chain
+    }
+    return jsonify(respponse), 200
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
