@@ -25,38 +25,40 @@ class Wallet(object):
         return self._blockchain_address
     
     def generate_blockchain_address(self):
-        #2
+        # 1) Get the raw public key bytes (derived from the private key)
         public_key_bytes = self._private_key.to_string()
+
+        # 2) Hash the public key with SHA-256 (first hashing stage)
         sha256_bpk = hashlib.sha256(public_key_bytes)
         sha256_bpk_digit = sha256_bpk.digest()
 
-        #3
+        # 3) Hash the SHA-256 result with RIPEMD-160 (creates the 20-byte public key hash)
         ripemed160_bpk = hashlib.new("ripemd160")
         ripemed160_bpk.update(sha256_bpk_digit)
         ripemed160_bpk_digit = ripemed160_bpk.digest()
         ripemed160_bpk_hex = codecs.encode(ripemed160_bpk_digit, "hex")
-
-        #4
+   
+         # 4) Add the network/version prefix (e.g., 0x00 for Bitcoin mainnet P2PKH)
         nework_byte = b'00'
         nework_bitocoin_public_key = nework_byte + ripemed160_bpk_hex
         nework_bitocoin_public_key_byte = codecs.decode(
             nework_bitocoin_public_key, "hex"
         )
 
-        #5 
+        # 5) Compute checksum = first 4 bytes of double-SHA256(prefix + pubKeyHash)
         sha256_bpk = hashlib.sha256(nework_bitocoin_public_key_byte)
         sha256_bpk_digit = sha256_bpk.digest()
         sha256_2_nbpk = hashlib.sha256(sha256_bpk_digit)
         sha256_2_bpk_digit = sha256_2_nbpk.digest()
         sha256_2_hex = codecs.encode(sha256_2_bpk_digit, "hex")
 
-        #6 
+        # 6) Take the first 4 bytes (8 hex chars) as the checksum
         chechsum = sha256_2_hex[:8]
 
-        #7 
+        # 7) Build the full payload = prefix + pubKeyHash + checksum (hex string form)
         address_hex = (nework_bitocoin_public_key + chechsum).decode('utf-8')
 
-        #8 
+        # 8) Base58Check-encode the payload to get the human-readable address
         blockchain_address = base58.b58encode(address_hex).decode('utf-8')
         return blockchain_address
     
