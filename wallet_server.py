@@ -10,6 +10,16 @@ app = Flask(__name__, template_folder='./templates')
 def index():
     return render_template('./index.html')
 
+@app.route('/wallet', methods=['POST'])
+def create_wallet():
+    my_wallet = wallet.Wallet()
+    response = {
+        'private_key' : my_wallet.private_key,
+        'public_key' : my_wallet.public_key,
+        'blockchain_address' : my_wallet.blockchain_address
+    }
+    return jsonify(response), 200
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()

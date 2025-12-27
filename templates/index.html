@@ -3,7 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Wallet</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(function(){
+            $.ajax({
+                url: '/wallet',
+                type: 'POST',
+                success: function (response) {
+                    $('#public_key').val(response['public_key']);
+                    $('#private_key').val(response['private_key']);
+                    $('#blockchain_address').val(response['blockchain_address']);
+                    console.info(response);
+
+
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            })
+        })
+    </script>
 </head>
 <body>
     <div>
@@ -24,8 +43,8 @@
         <div>
             Address: <input id="recipient_blockchain_address" size="100"
                             type="text"><br>
-            Amoount: <input id="send_amount" type="text"><br>
-            <button id="send_meney_botton">Send</button>
+            Amount: <input id="send_amount" type="text"><br>
+            <button id="send_meney_button">Send</button>
         </div>
     </div>
 </body>
