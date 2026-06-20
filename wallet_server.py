@@ -48,11 +48,10 @@ def create_transaction():
         sender_public_key,
         sender_blockchain_address,
         recipient_blockchain_address,
-        sender_public_key,
         value
     )
 
-    joson_data = {
+    json_data = {
         'sender_blockchain_address' : sender_blockchain_address,
         'recipient_blockchain_address' : recipient_blockchain_address,
         'sender_public_key' : sender_public_key,
@@ -61,8 +60,8 @@ def create_transaction():
     }
 
     response = requests.post(
-        urllib.parse.urljoin(app.config['gw'], 'transaactions'),
-        json=joson_data, timeout=3
+        urllib.parse.urljoin(app.config['gw'], 'transactions'),
+        json=json_data, timeout=3
     )
 
     if response.status_code == 201:

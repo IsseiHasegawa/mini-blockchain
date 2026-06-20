@@ -46,7 +46,7 @@ def transaction():
             'sender_blockchain_address',
             'recipient_blockchain_address',
             'value',
-            'sneder_public_key',
+            'sender_public_key',
             'signature'
         )
         if not all(k in request_json for k in required):
@@ -56,12 +56,20 @@ def transaction():
             request_json['sender_blockchain_address'],
             request_json['recipient_blockchain_address'],
             request_json['value'],
-            request_json['sneder_public_key'],
+            request_json['sender_public_key'],
             request_json['signature'],
         )
         if not is_created:
             return jsonify({'message' : 'fail'}), 400
         return jsonify({'message' : 'succcess'}), 201
+    
+@app.route('/mine', methods=['GET'])
+def mine():
+    block_chain = get_blockchain()
+    is_mined = block_chain.mining()
+    if is_mined:
+        return jsonify({'message' : 'success'}), 200
+    return jsonify({'message' : 'fail'}), 400
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
