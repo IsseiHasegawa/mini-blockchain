@@ -1,16 +1,11 @@
-import base58
-import codecs
-import hashlib
-import utils
-
 from ecdsa import NIST256p
 from ecdsa import SigningKey
 
-class Wallet(object):
+class Wallet():
+
     def __init__(self):
-        self._private_key = SigningKey.generate(curve=NIST256p)
+        self._private_key = SigningKey.generate(NIST256p)
         self._public_key = self._private_key.get_verifying_key()
-        self._blockchain_address = self.generate_blockchain_address()
 
     @property
     def private_key(self):
@@ -20,98 +15,9 @@ class Wallet(object):
     def public_key(self):
         return self._public_key.to_string().hex()
     
-    @property
-    def blockchain_address(self):
-        return self._blockchain_address
-    
-    def generate_blockchain_address(self):
-        # 1) Get the raw public key bytes (derived from the private key)
-        public_key_bytes = self._private_key.to_string()
 
-        # 2) Hash the public key with SHA-256 (first hashing stage)
-        sha256_bpk = hashlib.sha256(public_key_bytes)
-        sha256_bpk_digit = sha256_bpk.digest()
-
-        # 3) Hash the SHA-256 result with RIPEMD-160 (creates the 20-byte public key hash)
-        ripemed160_bpk = hashlib.new("ripemd160")
-        ripemed160_bpk.update(sha256_bpk_digit)
-        ripemed160_bpk_digit = ripemed160_bpk.digest()
-        ripemed160_bpk_hex = codecs.encode(ripemed160_bpk_digit, "hex")
-   
-         # 4) Add the network/version prefix (e.g., 0x00 for Bitcoin mainnet P2PKH)
-        nework_byte = b'00'
-        nework_bitocoin_public_key = nework_byte + ripemed160_bpk_hex
-        nework_bitocoin_public_key_byte = codecs.decode(
-            nework_bitocoin_public_key, "hex"
-        )
-
-        # 5) Compute checksum = first 4 bytes of double-SHA256(prefix + pubKeyHash)
-        sha256_bpk = hashlib.sha256(nework_bitocoin_public_key_byte)
-        sha256_bpk_digit = sha256_bpk.digest()
-        sha256_2_nbpk = hashlib.sha256(sha256_bpk_digit)
-        sha256_2_bpk_digit = sha256_2_nbpk.digest()
-        sha256_2_hex = codecs.encode(sha256_2_bpk_digit, "hex")
-
-        # 6) Take the first 4 bytes (8 hex chars) as the checksum
-        chechsum = sha256_2_hex[:8]
-
-        # 7) Build the full payload = prefix + pubKeyHash + checksum (hex string form)
-        address_hex = (nework_bitocoin_public_key + chechsum).decode('utf-8')
-
-        # 8) Base58Check-encode the payload to get the human-readable address
-        blockchain_address = base58.b58encode(address_hex).decode('utf-8')
-        return blockchain_address
-    
-class Transaction(object):
-    def __init__(self, sender_private_key, sender_public_key,
-                 sender_blockchain_address, recipient_blockchain_address,
-                 value):
-        self.sender_private_key = sender_private_key
-        self.sender_public_key = sender_public_key
-        self.sender_blockchain_address = sender_blockchain_address
-        self.recipient_blockchain_address = recipient_blockchain_address
-        self.value = value
-
-    def generate_signature(self):
-        sha256 = hashlib.sha256()
-        transaction = utils.sorted_dict_by_key({
-            "sender_blockchain_address" : self.sender_blockchain_address,
-            "recipient_blockchain_address" : self.recipient_blockchain_address,
-            "value" : float(self.value)
-        })
-        sha256.update(str(transaction).encode('utf-8'))
-        message = sha256.digest()
-        private_key = SigningKey.from_string(
-            bytes().fromhex(self.sender_private_key), curve=NIST256p
-        )
-        private_key_sign = private_key.sign(message)
-        signature = private_key_sign.hex()
-        return signature
-
-
-if __name__ == '__main__':
-    wallet_M = Wallet()
-    wallet_A = Wallet()
-    wallet_B = Wallet()
-    t = Transaction(
-        wallet_A.private_key, wallet_A.public_key, wallet_A.blockchain_address,
-        wallet_B.blockchain_address, 1.0
-    )
-
-    ############################ Blockchain Node
-    import blockchain
-    block_chain = blockchain.BlockChain(
-        blockchain_address = wallet_M.blockchain_address)
-    is_added = block_chain.add_transaction(
-        wallet_A.blockchain_address,
-        wallet_B.blockchain_address,
-        1.0,
-        wallet_A.public_key,
-        t.generate_signature())
-    print("Added?", is_added)
-    block_chain.mining()
-    utils.pprint(block_chain.chain)
-
-    print("A", block_chain.calculate_total_amount(wallet_A.blockchain_address))
-    print("B", block_chain.calculate_total_amount(wallet_B.blockchain_address))
-
+if __name__ == "__main__":
+    wallet = Wallet()
+    print(wallet.private_key)
+    print(wallet.public_key)
+        
